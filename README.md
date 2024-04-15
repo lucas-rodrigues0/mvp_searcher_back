@@ -31,3 +31,17 @@ CREATE DATABASE searcher;
 ```
 
 Criar o arquivo `.env` com as configuração de acesso ao banco de dados. Pode utilizar o arquivo `env.sample`, duplicando o arquivo e renomendo para .env com as devidas variáveis pedidas
+
+Executar o script para a criação das tabelas no db
+```
+python create_tables.py 
+```
+
+### Indexação do arquivo PDF
+
+Executar o script para a indexação do arquivo PDF utilizado na aplicação.
+```
+python pdf_indexation.py 
+```
+No console deverá ser apresentado 264 páginas com o status OK. Caso já houver feito o index, esse será sobre-escrito pela nova execução.
+O conteúdo das páginas só será inserido no db caso ainda não esteje salvo. Caso já exita no db, será apresentado uma messagem informando que as páginas já existem. 
