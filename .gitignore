@@ -7,3 +7,4 @@ __pycache__/
 
 # Outros
 full_text_searcher/index_directory/*
+log/*

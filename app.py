@@ -143,11 +143,12 @@ def get_all_comments():
     )
 
     if not comments:
-        return {"comments": []}, 200
+        data = {"comments": []}
     else:
         logger.debug(f"%d comentarios encontrados" % len(comments))
 
-        return serialize_comments_list(comments), 200
+        data = serialize_comments_list(comments)
+    return {"data": data}, 200
 
 
 @app.post(
