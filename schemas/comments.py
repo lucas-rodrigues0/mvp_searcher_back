@@ -7,7 +7,7 @@ from model import Accounts, Comments
 class CommentSchema(BaseModel):
     """Define como um novo comentario será representado para inserção na base de dados"""
 
-    content: str
+    content: str = "qualquer texto de comentario"
 
 
 class CommentViewSchema(BaseModel):

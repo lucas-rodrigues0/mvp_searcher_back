@@ -57,8 +57,8 @@ def register_account(body: AccountSchema):
     username = data.get("username")
     password = data.get("password")
 
-    if not username or not password:
-        error_msg = "Nome de usuário e senha são necessários para registro"
+    if not username or not email or not password:
+        error_msg = "Nome de usuário, email e senha são necessários para registro"
         logger.warning(f"Erro ao adicionar usuario. {error_msg}")
         return {"data": {"message": error_msg}}, 409
 

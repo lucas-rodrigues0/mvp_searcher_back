@@ -5,16 +5,16 @@ from pydantic import BaseModel
 class AccountSchema(BaseModel):
     """Define como um novo usuário será representado para inserção na base de dados"""
 
-    username: str
-    email: str
-    password: str
+    username: str = "Nome Usuario"
+    email: str = "novo@mail.com"
+    password: str = "123456"
 
 
 class AccountAuthForm(BaseModel):
     """Define como um usuário já cadastrado será representado para a autenticação"""
 
-    email: str
-    password: str
+    email: str = "novo@mail.com"
+    password: str = "123456"
 
 
 class AccountToken(BaseModel):
