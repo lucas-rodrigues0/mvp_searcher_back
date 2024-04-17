@@ -17,7 +17,7 @@ class CommentViewSchema(BaseModel):
     account_id: str = "2a2e4d1a-8db4-4f78-8f1e-5393f3285431"
     username: str = "Nome do usuário"
     content: str = "qualquer texto de comentario"
-    created_at: str = "Sat, 06 Apr 2024 00:00:00 GMT"
+    created_at: str = "06/04/2024"
 
 
 class CommentsListSchema(BaseModel):
