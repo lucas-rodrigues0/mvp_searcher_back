@@ -46,7 +46,7 @@ def home():
 @app.post(
     "/account/register",
     tags=[account_tag],
-    responses={"200": AccountViewSchema, "409": ErrorSchema, "400": ErrorSchema},
+    responses={"200": AccountToken, "409": ErrorSchema, "400": ErrorSchema},
 )
 def register_account(body: AccountSchema):
     """Adiciona um novo Usuário à base de dados
@@ -56,6 +56,11 @@ def register_account(body: AccountSchema):
     email = data.get("email")
     username = data.get("username")
     password = data.get("password")
+
+    if not username or not password:
+        error_msg = "Nome de usuário e senha são necessários para registro"
+        logger.warning(f"Erro ao adicionar usuario. {error_msg}")
+        return {"data": {"message": error_msg}}, 409
 
     account = Accounts(username=username, email=email, password=password)
     logger.debug(f"Adicionando usuario de nome: '{account.username}'")
@@ -68,17 +73,12 @@ def register_account(body: AccountSchema):
             "account_id": str(account.account_id),
             "username": account.username,
             "email": account.email,
-            "active": account.active,
-            "updated_at": str(account.updated_at),
         }
 
         logger.debug(f"Adicionado usuário de nome: '{account.username}'")
 
-        # Extrai os dados necessários do usuário para a codificação do token JWT
-        encode_data = {
-            key: data[key] for key in data if key not in ["active", "updated_at"]
-        }
-        token = jwt_encode(encode_data)
+        # Usa os dados necessários do usuário para a codificação do token JWT
+        token = jwt_encode(data)
 
         return {"data": {"token": token, "account_id": str(account.account_id)}}, 200
 
@@ -98,7 +98,7 @@ def register_account(body: AccountSchema):
 @app.post(
     "/account/login",
     tags=[account_tag],
-    responses={"200": AccountToken, "404": ErrorSchema},
+    responses={"200": AccountToken, "403": ErrorSchema, "404": ErrorSchema},
 )
 def signin_account(body: AccountAuthForm):
     """Faz a busca do usuarios cadastrado e autentica o password"""
@@ -154,7 +154,12 @@ def get_all_comments():
 @app.post(
     "/comments",
     tags=[comment_tag],
-    responses={"200": CommentViewSchema},
+    responses={
+        "200": CommentViewSchema,
+        "400": ErrorSchema,
+        "403": ErrorSchema,
+        "409": ErrorSchema,
+    },
     security=security,
 )
 def insert_comment(body: CommentSchema):
@@ -167,49 +172,51 @@ def insert_comment(body: CommentSchema):
     token = str(request.authorization).split(" ")[-1]
     token_check = jwt_decode(token)
 
-    if token_check:
-        data = request.get_json()
-        account_id = token_check.get("account_id")
-        content = data.get("content")
+    if not token_check:
+        error_msg = "Login não encontrado. É necessário estar logado para inserir novo comentário."
+        logger.warning(f"Erro ao adicionar comentário. {error_msg}")
+        return {"data": {"message": error_msg}}, 403
 
-        comment = Comments(account_id=account_id, content=content)
-        logger.debug(
-            f"Adicionando comentário de account com id: '{comment.account_id}'"
-        )
-        try:
+    data = request.get_json()
+    account_id = token_check.get("account_id")
+    content = data.get("content")
 
-            session = Session()
-            account = session.get_one(Accounts, account_id)
-            session.add(comment)
-            session.commit()
+    if not content:
+        error_msg = "Conteúdo necessário para inserir comentário."
+        logger.warning(f"Erro ao adicionar comentário. {error_msg}")
+        return {"data": {"message": error_msg}}, 409
 
-            data = {
-                "comment_id": str(comment.comment_id),
-                "account_id": str(comment.account_id),
-                "account_username": account.username,
-                "content": comment.content,
-                "updated_at": str(comment.updated_at),
-            }
+    comment = Comments(account_id=account_id, content=content)
+    logger.debug(f"Adicionando comentário de account com id: '{comment.account_id}'")
 
-            return {"data": data}, 200
+    try:
+        session = Session()
+        account = session.get_one(Accounts, account_id)
+        session.add(comment)
+        session.commit()
 
-        except Exception as e:
-            error_msg = "Não foi possível inserir novo comentário"
-            logger.warning(
-                f"Erro ao adicionar comentário da account '{comment.account_id}', {error_msg}"
-            )
-            return {"data": {"message": error_msg}}, 400
-    return {
-        "data": {
-            "message": "Login não encontrado. É necessário estar logado para inserir novo comentário."
+        data = {
+            "comment_id": str(comment.comment_id),
+            "account_id": str(comment.account_id),
+            "account_username": account.username,
+            "content": comment.content,
+            "updated_at": str(comment.updated_at),
         }
-    }, 403
+
+        return {"data": data}, 200
+
+    except Exception as e:
+        error_msg = "Não foi possível inserir novo comentário"
+        logger.warning(
+            f"Erro ao adicionar comentário da account '{comment.account_id}', {error_msg}"
+        )
+        return {"data": {"message": error_msg}}, 400
 
 
 @app.get(
     "/searcher",
     tags=[searcher_tag],
-    responses={"200": SearcherResponseSchema},
+    responses={"200": SearcherResponseSchema, "403": ErrorSchema},
     security=security,
 )
 def query_searcher(query: SearcherQuerySchema):
@@ -228,7 +235,9 @@ def query_searcher(query: SearcherQuerySchema):
 
         return {"data": {"results": results, "total_count": len(results)}}, 200
 
-    return {"data": {"message": "Autenticação necessária. Fazer o login."}}, 403
+    error_msg = "Autenticação necessária. Fazer o login antes de pesquisar."
+    logger.warning(f"Erro a pesquisar. {error_msg}")
+    return {"data": {"message": error_msg}}, 403
 
 
 if __name__ == "__main__":
