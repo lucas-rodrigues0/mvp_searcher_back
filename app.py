@@ -112,9 +112,9 @@ def signin_account(body: AccountAuthForm):
     account = session.query(Accounts).filter(Accounts.email == email).first()
 
     if not account:
-        return {"data": {"message": "User not found by email"}}, 404
+        return {"data": {"message": "Usuário não encontrado pelo email"}}, 404
     elif password != account.password:
-        return {"data": {"message": "Invalid password"}}, 403
+        return {"data": {"message": "Senha inválida"}}, 403
     else:
         # Extrai os dados necessários do usuário para a codificação do token JWT
         encode_data = {
