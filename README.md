@@ -18,6 +18,7 @@ Esse projeto é um MVP e pretende evoluir para que, tanto o pesquisador de texto
 - [Python](https://www.python.org/)
 - [Flask-openapi3](https://luolingchun.github.io/flask-openapi3/v3.x/)
 - [SQLAlchemy](https://www.sqlalchemy.org/)
+- [SQLAlchemy-Utils](https://sqlalchemy-utils.readthedocs.io/en/latest/index.html)
 - [PostgreSQL](https://www.postgresql.org/)
 - [Whoosh](https://whoosh.readthedocs.io/en/latest/index.html)
 - [PyPDF2](https://pypdf2.readthedocs.io/en/3.x/)
@@ -30,19 +31,19 @@ Fazer o download do projeto e seguir os passos a seguir.
 
 ### Set-up inicial:
 
-- Na raiz do projeto, criar um ambiente virtual Python para a instalação das dependências.
+- Na raiz do projeto, criar um ambiente virtual Python para a instalação das dependências. No terminal executar o comando:
 
 ```
 python3 -m venv .venv
 ```
  
-- Ativar o ambiente virtual.
+- Ativar o ambiente virtual. No terminal executar o comando:
 
 ```
 source .venv/bin/activate
 ```
 
-- Instalar as dependencias do projeto.
+- Instalar as dependencias do projeto. No terminal executar o comando:
 
 ```
 pip install -r requirements.txt
@@ -50,27 +51,24 @@ pip install -r requirements.txt
 
 ### Criação do banco de dados:
 
-- Criar um database no banco postgres. Pode criar o database com um nome diferente, mas colocar o nome do database no arquivo `.env` especificando o acesso ao database criado. O nome sugerido é "searcher".
-
-- Pelo comando `psql` do postgres.
-
-```
-CREATE DATABASE searcher;
-```
-
-- Para maiores informações de como instalar e criar um database, clique aqui para a documentação do PostgreSQL: 
+- Para maiores informações de como instalar o PostgreSQL, clique no link para a documentação: 
     - [Instalação](https://www.postgresql.org/docs/current/tutorial-install.html)
-    - [Criar database](https://www.postgresql.org/docs/current/tutorial-createdb.html)
 
+- Criar o arquivo `.env` com as configuração de acesso ao banco de dados. Pode utilizar o arquivo `env.sample`, duplicando esse arquivo e renomendo ele para `.env` com as devidas variáveis preenchidas. As variaveis necessárias são:
 
-- Depois de criado o database, adicionar as configurações necessárias para o acesso ao banco de dados.
+    - `HOST` (deve ser o localhost onde o postgres local estará servido)
+    - `DATABASE` (nome do database a ser criado, pode utilizar o que está no arquivo env.sample)
+    - `USER` (o usuário do postgres, o default deverá ser 'postgres')
+    - `PASSWORD` (senha de acesso ao postgres, o default deverá ser 'postgres')
+    - `PORT` (porta de acesso ao postgres, o default deverá ser 5432)
+    - `JWT_SECRET` (A secret utilizada pelo jwt para a codificação, pode utilizar a que está no exemplo do arquivo env.sample)
 
-- Criar o arquivo `.env` com as configuração de acesso ao banco de dados. Pode utilizar o arquivo `env.sample`, duplicando o arquivo e renomendo para .env com as devidas variáveis pedidas.
+- O script inicial `create_database.py` ira configurar a conexão, criar um novo database, criar as tabelas e inserir alguns dados mockados nas tabelas 'accounts' e 'comments' para avaliação.
 
-- Executar o script para a criação das tabelas no db.
+- Para executar o script de criação do database, no terminal use o comando:
 
 ```
-python create_tables.py 
+python create_database.py 
 ```
 
 ### Indexação do arquivo PDF:
